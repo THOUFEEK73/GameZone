@@ -74,59 +74,108 @@ export const createUser = async (tempUser) => {
 
 // Verify OTP
 
+// ... existing imports and code ...
+
 export const verifyOTP = async (req, res) => {
   try {
     const { email, otp1, otp2, otp3, otp4, otp5, otp6 } = req.body;
-    const fullOTP = otp1 + otp2 + otp3 + otp4 + otp5 + otp6;
-    console.log("Submitted OTP:", fullOTP);
-
+    const fullOTP = `${otp1}${otp2}${otp3}${otp4}${otp5}${otp6}`;
+    
     // Find the OTP record
     const otpRecord = await OTP.findOne({ email });
-    console.log("Found OTP record:", otpRecord);
-
+    
     if (!otpRecord) {
       return res.render("user/verify-otp", {
         email,
-        err: "OTP expired or not found",
+        err: "OTP expired or not found. Please request a new OTP.",
       });
     }
 
     // Match the OTP
-    if (otpRecord.otp === fullOTP) {
-      const tempUser = req.session.tempUser;
+    if (otpRecord.otp !== fullOTP) {
+      return res.render("user/verify-otp", {
+        email,
+        err: "Invalid OTP. Please try again.",
+      });
+    }
 
-      if (!tempUser) {
-        return res.render("user/verify-otp", {
-          email,
-          err: "Registration data not found",
-        });
-      }
+    // Get user data from session
+    const tempUser = req.session.tempUser;
+    if (!tempUser) {
+      return res.render("user/verify-otp", {
+        email,
+        err: "Registration data not found. Please register again.",
+      });
+    }
 
-      // Save user to DB (if not already saved) — assuming you're doing it now
-      const newUser = await User.create(tempUser);
+    try {
+      // Create new user
+      const newUser = await User.create({
+        name: tempUser.name,
+        email: tempUser.email,
+        phone: tempUser.phone,
+        password: tempUser.password,
+        isVerified: true
+      });
 
-      // Clear tempUser and OTP
+      // Clear session data and OTP
       delete req.session.tempUser;
       await OTP.deleteOne({ email });
 
-      // Authenticate user
+      // Set session for authenticated user
       req.session.userId = newUser._id;
+      req.session.user = {
+        name: newUser.name,
+        email: newUser.email
+      };
 
       // Redirect to home page
-      return res.render("user/home", { user: newUser });
-    } else {
+      return res.redirect('/home');
+    } catch (error) {
+      console.error('User creation error:', error);
       return res.render("user/verify-otp", {
         email,
-        err: "Invalid OTP. Please try again",
+        err: "Failed to create user account. Please try again.",
       });
     }
   } catch (err) {
     console.error("OTP verification error:", err);
     return res.render("user/verify-otp", {
-      err: "Server error. Please try again",
+      email: req.body.email,
+      err: "Server error. Please try again.",
     });
   }
 };
+
+// Add resend OTP functionality
+export const resendOTP = async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    // Delete existing OTP if any
+    await OTP.deleteOne({ email });
+    
+    // Generate and send new OTP
+    const otpSent = await generateOTP(email);
+    
+    if (!otpSent) {
+      return res.status(500).json({ 
+        message: "Failed to send OTP. Please try again." 
+      });
+    }
+    
+    return res.status(200).json({ 
+      message: "OTP has been resent to your email." 
+    });
+  } catch (error) {
+    console.error("Resend OTP error:", error);
+    return res.status(500).json({ 
+      message: "Server error. Please try again." 
+    });
+  }
+};
+
+// ... rest of the existing code ...
 
 export const postLogin = async (req, res) => {
   try {
