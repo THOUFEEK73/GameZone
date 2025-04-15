@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>OTP Verification</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Success Animation */
+    .success-animation {
+      animation: success-animation 1s ease-in-out forwards;
+    }
+
+    @keyframes success-animation {
+      0% {
+        transform: scale(1);
+        opacity: 0;
+      }
+      50% {
+        transform: scale(1.5);
+        opacity: 0.5;
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .otp-input {
+      width: 3rem;
+      height: 3rem;
+      text-align: center;
+      font-size: 2rem;
+      border-radius: 1rem;
+      border: 2px solid #d1d5db;
+      background-color: #f9fafb;
+      color: #333;
+      transition: all 0.3s ease;
+    }
+
+    .otp-input:focus {
+      outline: none;
+      border-color: #4f46e5;
+      background-color: #e5e7eb;
+    }
+
+    .otp-input:disabled {
+      background-color: #f3f4f6;
+      border-color: #e5e7eb;
+    }
+
+    .otp-input::placeholder {
+      color: rgba(51, 51, 51, 0.5);
+    }
+  </style>
+</head>
+<body class="bg-white text-gray-800 min-h-screen flex items-center justify-center">
+  <div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-md text-center transform transition-all duration-300 hover:scale-105 border border-gray-300">
+    <h2 class="text-3xl font-bold mb-4 text-gray-900">Verify OTP</h2>
+    <p class="text-sm text-gray-600 mb-6">Enter the 6-digit code sent to your email.</p>
+    
+    <form id="otpForm" action="/verify-otp" method="POST">
+      <input type="hidden" id="email" name="email" value="<%= email %>">
+      
+      <div class="flex justify-between gap-4 mb-6">
+        <input type="text" maxlength="1" id="otp1" name="otp1" class="otp-input" oninput="moveToNext(this, 'otp2')" />
+        <input type="text" maxlength="1" id="otp2" name="otp2" class="otp-input" oninput="moveToNext(this, 'otp3')" />
+        <input type="text" maxlength="1" id="otp3" name="otp3" class="otp-input" oninput="moveToNext(this, 'otp4')" />
+        <input type="text" maxlength="1" id="otp4" name="otp4" class="otp-input" oninput="moveToNext(this, 'otp5')" />
+        <input type="text" maxlength="1" id="otp5" name="otp5" class="otp-input" oninput="moveToNext(this, 'otp6')" />
+        <input type="text" maxlength="1" id="otp6" name="otp6" class="otp-input" />
+      </div>
+
+      <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-xl transition duration-300 transform hover:scale-105">
+        Verify OTP
+      </button>
+    </form>
+
+    <div class="mt-4 text-sm text-gray-600 cursor-pointer hover:underline" id="message" onclick="resendOTP()">
+      <span class="text-blue-500">Resend OTP</span>
+    </div>
+
+    <% if (typeof err !== 'undefined') { %>
+      <div class="mt-4 text-red-500"><%= err %></div>
+    <% } %>
+
+    <% if (typeof email !== 'undefined') { %>
+      <div class="mt-4 text-red-500"><%= email %></div>
+    <% } %>
+
+    <div id="successMessage" class="mt-4 text-green-500 text-xl hidden">OTP Verified Successfully!</div>
+  </div>
+
+  <script>
+    // Function to move to next input field
+    function moveToNext(current, nextId) {
+      if (current.value.length === current.maxLength) {
+        const next = document.getElementById(nextId);
+        if (next) {
+          next.focus();
+        }
+      }
+    }
+
+    // Function to handle backspace
+    document.addEventListener("DOMContentLoaded", () => {
+      const otpInputs = document.querySelectorAll(".otp-input");
+      
+      otpInputs.forEach((input, index) => {
+        input.addEventListener("keydown", (e) => {
+          // If backspace is pressed and current input is empty, focus previous input
+          if (e.key === "Backspace" && input.value === "" && index > 0) {
+            otpInputs[index - 1].focus();
+          }
+        });
+      });
+    });
+
+    // Function to display success animation
+    function showSuccessAnimation() {
+      const successMessage = document.getElementById('successMessage');
+      successMessage.classList.remove('hidden');
+      successMessage.classList.add('success-animation');
+    }
+
+    // Resend OTP logic
+    function resendOTP() {
+      const email = document.getElementById('email').value;
+      fetch('/resend-otp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email })
+      })
+      .then(response => response.json())
+      .then(data => {
+        alert(data.message || "OTP has been resent to your email");
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert("Failed to resend OTP. Please try again.");
+      });
+    }
+  </script>
+</body>
+</html>
