@@ -3,23 +3,30 @@ import { getSignUpPage, getLoginPage, postSignUp, postLogin, verifyOTP } from ".
  
 const router = express.Router();
 
+
+
+// Authentication middleWare
+
+ const isAuthenticated = (req,res,next)=>{
+  if(!req.session.userId){
+    return res.redirect('/login')
+  }
+  next();
+}
+
+
 router.get("/login", getLoginPage);
-router.get("/signup", getSignUpPage);
-
-
-router.get('/home', (req, res) => {
-    if (!req.session.userId) {
-      return res.redirect('/login');
-    }
-    // Use res.render instead of res.sendFile
-    res.render('/home', { 
-      userId: req.session.userId 
-      // You can pass any other data you want to display in the template
-    });
-  });
-
-router.post("/signup", postSignUp);
 router.post("/login", postLogin);
+router.get("/signup", getSignUpPage);
+router.post("/signup", postSignUp);
 router.post('/verify-otp',verifyOTP)
+
+
+router.get('/home',isAuthenticated,(req,res)=>{
+  res.render('user/home',{
+    userId:req.session.userId,
+    user:req.session
+  })
+})
 
 export default router;
