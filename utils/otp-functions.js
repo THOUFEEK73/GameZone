@@ -4,7 +4,14 @@ import sendEmail  from "./mailer.js"; // Adjust path as needed
 
 export const generateOTP = async (email) => {
   try {
+     
+     if(!email || typeof email !== 'string'){
+         throw new error('Invalid email');
+     } 
+     
     const generateotp = crypto.randomInt(100000, 999999).toString();
+
+    // Delete existing OTP if any
     await OTP.deleteOne({ email });
 
     const otp = new OTP({ email, otp: generateotp });

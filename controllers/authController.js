@@ -8,22 +8,45 @@ import { generateOTP } from "../utils/otp-functions.js";
 dotenv.config();
 
 export const getSignUpPage = (req, res) => {
+  if (req.session.userId) {
+    return res.redirect('/home');
+  }
   res.render("user/signup", { err: null });
 };
 
 export const getLoginPage = (req, res) => {
-  res.render("user/login");
+  if (req.session.userId) {
+    return res.redirect('/home');
+  }
+  return res.render("user/login", { err: null });
 };
+
+
+export const logout =(req,res)=>{
+  req.session.destroy((err) =>{
+    if(err){
+      console.error('Error destroying session:',err);
+      return res.status(500).json({message:"Error destroying session"});
+    }
+    res.clearCookie('connect.sid');
+    res.redirect('/login');
+  })
+}
 
 export const postSignUp = async (req, res) => {
   try {
     const { name, email, phone, password, confirm_password } = req.body;
-
+    console.log(req.body)
     // Validate Require Fields
 
     if (!name || !email || !phone || !password || !confirm_password) {
-      return res.render("/signup", { err: "Please Fill The Empty Field" });
+      // console.log("signup hit")
+      return res.render("user/signup", { err: "Please Fill The Empty Field" });
     }
+
+    // if(password.length<8){
+    //   return res.render('user/signup',{err:"password must be at least 8 characters long"})
+    // }
 
     // Check if User already Exist
     const existingUser = await User.findOne({ email });
@@ -74,16 +97,14 @@ export const createUser = async (tempUser) => {
 
 // Verify OTP
 
-// ... existing imports and code ...
-
 export const verifyOTP = async (req, res) => {
   try {
     const { email, otp1, otp2, otp3, otp4, otp5, otp6 } = req.body;
     const fullOTP = `${otp1}${otp2}${otp3}${otp4}${otp5}${otp6}`;
-    
+
     // Find the OTP record
     const otpRecord = await OTP.findOne({ email });
-    
+
     if (!otpRecord) {
       return res.render("user/verify-otp", {
         email,
@@ -151,26 +172,26 @@ export const verifyOTP = async (req, res) => {
 export const resendOTP = async (req, res) => {
   try {
     const { email } = req.body;
-    
+
     // Delete existing OTP if any
     await OTP.deleteOne({ email });
-    
+
     // Generate and send new OTP
     const otpSent = await generateOTP(email);
-    
+
     if (!otpSent) {
-      return res.status(500).json({ 
-        message: "Failed to send OTP. Please try again." 
+      return res.status(500).json({
+        message: "Failed to send OTP. Please try again."
       });
     }
-    
-    return res.status(200).json({ 
-      message: "OTP has been resent to your email." 
+
+    return res.status(200).json({
+      message: "OTP has been resent to your email."
     });
   } catch (error) {
     console.error("Resend OTP error:", error);
-    return res.status(500).json({ 
-      message: "Server error. Please try again." 
+    return res.status(500).json({
+      message: "Server error. Please try again."
     });
   }
 };
@@ -198,7 +219,7 @@ export const postLogin = async (req, res) => {
     }
     // Set session data
     req.session.userId = user._id;
-    req.session.userId = {
+    req.session.user = {
       name: user.name,
       email: user.email,
     };
@@ -211,10 +232,12 @@ export const postLogin = async (req, res) => {
           err: "Server error Please Try Again",
         });
       }
-      return res.render("user/home", { user });
+      return res.redirect("/home");
     });
   } catch (err) {
     console.error("Login error:", err);
     return res.render("user/login", { err: "Server error Please Try Again" });
   }
 };
+
+

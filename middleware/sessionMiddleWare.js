@@ -1,16 +1,17 @@
 import session from 'express-session';
 
 const sessionMiddleware = session({
-
-    secret: process.env.SESSION_SECRET || 'defaultSecret', // use env variable
+    secret: process.env.SESSION_SECRET || 'defaultSecret',
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
     cookie: {
-      secure: false, // true if using HTTPS
-      maxAge: 1000 * 60 * 60, // 1 hour (optional)
-    }
-  
- 
-  });
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        sameSite: 'strict'
+    },
+    name: 'sessionId',
+    rolling: true
+});
 
 export default sessionMiddleware;

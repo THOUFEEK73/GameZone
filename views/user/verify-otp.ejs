@@ -3,92 +3,88 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>OTP Verification</title>
+  <title>GameZone - OTP Verification</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
-    /* Success Animation */
-    .success-animation {
-      animation: success-animation 1s ease-in-out forwards;
-    }
-
-    @keyframes success-animation {
-      0% {
-        transform: scale(1);
-        opacity: 0;
-      }
-      50% {
-        transform: scale(1.5);
-        opacity: 0.5;
-      }
-      100% {
-        transform: scale(1);
-        opacity: 1;
-      }
-    }
-
     .otp-input {
-      width: 3rem;
-      height: 3rem;
+      width: 2.5rem;
+      height: 2.5rem;
       text-align: center;
-      font-size: 2rem;
-      border-radius: 1rem;
-      border: 2px solid #d1d5db;
-      background-color: #f9fafb;
-      color: #333;
-      transition: all 0.3s ease;
+      font-size: 1.5rem;
+      border-radius: 0.5rem;
+      background-color: rgba(39, 39, 42, 0.5);
+      border: 1px solid rgb(63, 63, 70);
+      color: white;
+      transition: all 0.2s ease;
     }
 
     .otp-input:focus {
       outline: none;
-      border-color: #4f46e5;
-      background-color: #e5e7eb;
+      border-color: white;
+      ring: 2px white;
     }
 
     .otp-input:disabled {
-      background-color: #f3f4f6;
-      border-color: #e5e7eb;
-    }
-
-    .otp-input::placeholder {
-      color: rgba(51, 51, 51, 0.5);
+      background-color: rgba(39, 39, 42, 0.3);
+      border-color: rgb(63, 63, 70);
     }
   </style>
 </head>
-<body class="bg-white text-gray-800 min-h-screen flex items-center justify-center">
-  <div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-md text-center transform transition-all duration-300 hover:scale-105 border border-gray-300">
-    <h2 class="text-3xl font-bold mb-4 text-gray-900">Verify OTP</h2>
-    <p class="text-sm text-gray-600 mb-6">Enter the 6-digit code sent to your email.</p>
-    
-    <form id="otpForm" action="/verify-otp" method="POST">
-      <input type="hidden" id="email" name="email" value="<%= email %>">
-      
-      <div class="flex justify-between gap-4 mb-6">
-        <input type="text" maxlength="1" id="otp1" name="otp1" class="otp-input" oninput="moveToNext(this, 'otp2')" />
-        <input type="text" maxlength="1" id="otp2" name="otp2" class="otp-input" oninput="moveToNext(this, 'otp3')" />
-        <input type="text" maxlength="1" id="otp3" name="otp3" class="otp-input" oninput="moveToNext(this, 'otp4')" />
-        <input type="text" maxlength="1" id="otp4" name="otp4" class="otp-input" oninput="moveToNext(this, 'otp5')" />
-        <input type="text" maxlength="1" id="otp5" name="otp5" class="otp-input" oninput="moveToNext(this, 'otp6')" />
-        <input type="text" maxlength="1" id="otp6" name="otp6" class="otp-input" />
+<body class="bg-gradient-to-b from-black via-zinc-900 to-black font-sans">
+  <div class="min-h-screen flex items-center justify-center px-4">
+    <div class="w-full max-w-md bg-zinc-900/50 backdrop-blur-sm p-8 rounded-2xl shadow-2xl border border-zinc-800/50 hover:border-zinc-700/50 transition-all duration-300">
+      <!-- Logo and Title -->
+      <div class="text-center mb-8 transform hover:scale-105 transition-transform duration-300">
+        <h1 class="text-5xl font-bold text-white mb-2 animate-pulse">GameZone</h1>
+        <p class="text-zinc-400 hover:text-zinc-300 transition-colors">Verify your account</p>
       </div>
 
-      <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-xl transition duration-300 transform hover:scale-105">
-        Verify OTP
+      <p class="text-zinc-400 text-sm mb-8">Enter the 6-digit code sent to <%= email %></p>
+      
+      <form id="otpForm" action="/verify-otp" method="POST">
+        <input type="hidden" id="email" name="email" value="<%= email %>">
+        
+        <div class="flex justify-between gap-3 mb-6">
+          <input type="text" maxlength="1" id="otp1" name="otp1" class="otp-input" oninput="moveToNext(this, 'otp2')" />
+          <input type="text" maxlength="1" id="otp2" name="otp2" class="otp-input" oninput="moveToNext(this, 'otp3')" />
+          <input type="text" maxlength="1" id="otp3" name="otp3" class="otp-input" oninput="moveToNext(this, 'otp4')" />
+          <input type="text" maxlength="1" id="otp4" name="otp4" class="otp-input" oninput="moveToNext(this, 'otp5')" />
+          <input type="text" maxlength="1" id="otp5" name="otp5" class="otp-input" oninput="moveToNext(this, 'otp6')" />
+          <input type="text" maxlength="1" id="otp6" name="otp6" class="otp-input" />
+        </div>
+
+        <!-- Error Message -->
+        <% if (typeof err !== 'undefined' && err) { %>
+          <div class="bg-red-900/20 border border-red-900/30 text-red-400 px-4 py-2 rounded-lg mb-6">
+            <%= err %>
+          </div>
+        <% } %>
+
+        <button type="submit" 
+          class="w-full bg-white text-black hover:bg-zinc-200 font-semibold py-3 rounded-lg 
+                 transition-all duration-300 transform hover:scale-[1.02] active:scale-95
+                 focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-black
+                 shadow-lg hover:shadow-white/10 mb-4">
+          Verify OTP
+        </button>
+      </form>
+
+      <div class="flex items-center my-6">
+        <hr class="flex-grow border-zinc-800">
+        <span class="px-4 text-zinc-500 text-sm">Didn't receive code?</span>
+        <hr class="flex-grow border-zinc-800">
+      </div>
+
+      <button onclick="resendOTP()" 
+        class="w-full bg-transparent border border-zinc-700 text-zinc-300 
+               hover:bg-zinc-800/50 hover:text-white font-semibold py-3 rounded-lg 
+               transition-all duration-300 transform hover:scale-[1.02] active:scale-95">
+        Resend OTP
       </button>
-    </form>
 
-    <div class="mt-4 text-sm text-gray-600 cursor-pointer hover:underline" id="message" onclick="resendOTP()">
-      <span class="text-blue-500">Resend OTP</span>
+      <div id="successMessage" class="mt-4 text-green-400 text-sm hidden">OTP Verified Successfully!</div>
     </div>
-
-    <% if (typeof err !== 'undefined') { %>
-      <div class="mt-4 text-red-500"><%= err %></div>
-    <% } %>
-
-    <% if (typeof email !== 'undefined') { %>
-      <div class="mt-4 text-red-500"><%= email %></div>
-    <% } %>
-
-    <div id="successMessage" class="mt-4 text-green-500 text-xl hidden">OTP Verified Successfully!</div>
   </div>
 
   <script>
