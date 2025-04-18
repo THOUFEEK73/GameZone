@@ -14,7 +14,14 @@ router.post('/resend-otp', resendOTP);
 
 // Add logout route
 router.get('/logout',isAthenticated, logout);
+router.get('/',isAthenticated,(req,res)=>{
+  res.render('user/home');
+})
 router.get('/home',isAthenticated, (req, res) => {
-    res.render('user/home'); // Assuming you're using EJS or another templating engine
+  if(!req.session.userId){
+    return res.redirect('/login');
+  }
+  res.setHeader('Cache-Control', 'no-cache, no-store');
+    res.render('user/home',{user:req.session.user}); // Assuming you're using EJS or another templating engine
   });
 export default router;
