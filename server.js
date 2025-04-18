@@ -13,9 +13,9 @@ const app = express();
 
 // Middleware to prevent caching for sensitive routes like login
 app.use("/login", (req, res, next) => {
-    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-  res.set('Pragma', 'no-cache');
-  res.set('Expires', '0');
+  res.set("Cache-Control", "no-store, no-cache, must-revalidate, private");
+  res.set("Pragma", "no-cache");
+  res.set("Expires", "0");
   next();
 });
 
@@ -24,11 +24,8 @@ app.use(sessionMiddleware);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-
 // Routes
 app.use("/", authRoutes);
-
-
 
 // View engine setup
 app.set("view engine", "ejs");

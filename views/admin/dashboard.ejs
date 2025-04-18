@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Ecommerce App</title>
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+    <div class="admin-container">
+        <%- include('../partials/admin-sidebar') %>
+
+        <main class="admin-main">
+            <%- include('../partials/admin-header') %>
+
+            <div class="dashboard-content">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Total Sales</h3>
+                        <p class="stat-value">$<%= stats.totalSales %></p>
+                        <p class="stat-change <%= stats.salesChange >= 0 ? 'positive' : 'negative' %>">
+                            <%= stats.salesChange %>% from last month
+                        </p>
+                    </div>
+
+                    <div class="stat-card">
+                        <h3>Total Orders</h3>
+                        <p class="stat-value"><%= stats.totalOrders %></p>
+                        <p class="stat-change <%= stats.ordersChange >= 0 ? 'positive' : 'negative' %>">
+                            <%= stats.ordersChange %>% from last month
+                        </p>
+                    </div>
+
+                    <div class="stat-card">
+                        <h3>Total Users</h3>
+                        <p class="stat-value"><%= stats.totalUsers %></p>
+                        <p class="stat-change <%= stats.usersChange >= 0 ? 'positive' : 'negative' %>">
+                            <%= stats.usersChange %>% from last month
+                        </p>
+                    </div>
+
+                    <div class="stat-card">
+                        <h3>Total Products</h3>
+                        <p class="stat-value"><%= stats.totalProducts %></p>
+                        <p class="stat-change <%= stats.productsChange >= 0 ? 'positive' : 'negative' %>">
+                            <%= stats.productsChange %>% from last month
+                        </p>
+                    </div>
+                </div>
+
+                <div class="charts-container">
+                    <div class="chart-card">
+                        <h3>Sales Overview</h3>
+                        <canvas id="salesChart"></canvas>
+                    </div>
+
+                    <div class="chart-card">
+                        <h3>Top Products</h3>
+                        <canvas id="productsChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="recent-orders">
+                    <h3>Recent Orders</h3>
+                    <table class="orders-table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% orders.forEach(order => { %>
+                                <tr>
+                                    <td><%= order.id %></td>
+                                    <td><%= order.customerName %></td>
+                                    <td><%= order.date %></td>
+                                    <td>$<%= order.amount %></td>
+                                    <td>
+                                        <span class="status-badge <%= order.status.toLowerCase() %>">
+                                            <%= order.status %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="action-btn view" onclick="viewOrder('<%= order.id %>')">
+                                            View
+                                        </button>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/js/admin-dashboard.js"></script>
+</body>
+</html> 

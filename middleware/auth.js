@@ -1,8 +1,8 @@
- const isLoogedIn = (req,res,next)=>{
+ const isAthenticated = (req,res,next)=>{
     if(req.session&& req.session.userId){
-        next()
+       return next()
     }else{
         res.redirect('/login')
     }
 }
-export default isLoogedIn;
+export default isAthenticated;
